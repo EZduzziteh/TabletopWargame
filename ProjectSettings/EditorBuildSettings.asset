@@ -6,6 +6,24 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/Scenes/Menu_Main.unity
+    guid: 2199703dd0769f54c9f1a007b028b7f2
+  - enabled: 1
+    path: Assets/Scenes/ArmyBuilder.unity
+    guid: ba8584b24aca3804c8ad4f5df148e7f3
+  - enabled: 1
+    path: Assets/Scenes/Map_01.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/MapTest.unity
+    guid: 1eadd9aca8e80774a92bdbd901721703
+  - enabled: 1
+    path: Assets/Scenes/Credits.unity
+    guid: ad75cbe113951514eab1f75046ea2d9b
+  - enabled: 1
+    path: Assets/Scenes/Win_Empire.unity
+    guid: 600bb1003d53ae348904eb2e179018fd
+  - enabled: 1
+    path: Assets/Scenes/Win_Undead.unity
+    guid: 48ec2bb82657f414fabb22425048df94
   m_configObjects: {}

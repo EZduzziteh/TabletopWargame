@@ -5,10 +5,12 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public bool isvsAI=false;
     public List<Unit> player1Units = new List<Unit>();
     public List<Unit> player2Units = new List<Unit>();
     public List<Unit> player1ActivatedUnits = new List<Unit>();
     public List<Unit> player2ActivatedUnits = new List<Unit>();
+    
     public PlayerIndex priorityplayer;
 
     public GameObject UnitCardWindow;
@@ -31,7 +33,10 @@ public class GameManager : MonoBehaviour
     public Text health;
     public Text save;
 
+   
 
+    public int P1UnitCount=0;
+    public int P2UnitCount=0;
 
     public Camera tacticalCamera;
     public Camera cinematicCamera;
@@ -43,20 +48,42 @@ public class GameManager : MonoBehaviour
     public Unit closetunit;
     public Model closestmodel;
 
+    public List<SpawnPoint> p1spawnpoints=new List<SpawnPoint>();
+    public List<SpawnPoint> p2spawnpoints = new List<SpawnPoint>();
+
     public enum BattlePhase { Order, Casting, Move, Shoot, Charge, Combat, Rally };
 
     public enum PlayerIndex { P1,P2/*,P3,P4*/};
 
     public Unit SelectedUnit;
     public Unit SelectedTarget;
-    
 
+    public ArmyConstructor armycon;
     public BattlePhase currentPhase = BattlePhase.Casting;
     public PlayerIndex pTurn = PlayerIndex.P1;
 
     // Start is called before the first frame update
     void Start()
     {
+        armycon = FindObjectOfType<ArmyConstructor>();
+        armycon.SpawnArmy();
+
+        foreach( Unit unit in FindObjectsOfType<Unit>())
+        {
+            if (unit.player == PlayerIndex.P1)
+            {
+                unit.transform.position = p1spawnpoints[P1UnitCount].transform.position;
+                P1UnitCount++;
+                
+             
+                
+            }
+            else
+            {
+                unit.transform.position = p2spawnpoints[P2UnitCount].transform.position;
+                P2UnitCount++;
+            }
+        }
         CreateActivationPool();
         StartTurn();
         RefreshUI();
@@ -77,7 +104,25 @@ public class GameManager : MonoBehaviour
     }
     private void Update()
     {
+
+     
       
+    }
+
+    public void ShowSelectedAttackRange()
+    {
+
+        if (SelectedUnit)
+        {
+            if (SelectedUnit.canMelee)
+            {
+                SelectedUnit.SetAttackTool();
+            }
+            else
+            {
+                SelectedUnit.SetShootTool();
+            }
+        }
     }
 
     public float GetTargetedToSelected()
@@ -467,17 +512,38 @@ public class GameManager : MonoBehaviour
     {
         if (SelectedUnit)
         {
+            
             if (SelectedUnit.GetComponent<Spell>())
             {
                 SelectedUnit.GetComponent<Spell>().iscasting = false;
+                SelectedUnit.SelectEffect.SetActive(false);
+                EndTurn();
             }
-            SelectedUnit.SelectEffect.SetActive(false);
-            EndTurn();
+            else
+            {
+                errorText.text = "Finish piling in around your leader!";
+            }
+           
         }
         else
         {
-            errorText.text = "Select a unit before passing its turn!";
+            if (pTurn == PlayerIndex.P1)
+            {
+                SelectedUnit = player1Units[0];
+            }
+            else
+            {
+                SelectedUnit = player2Units[0];
+            }
+            EndTurn();
         }
+
+
+      
+
+
+        //  errorText.text = "Select a unit before passing its turn!";
+
     }
     public void EndPhase()
     {
@@ -525,9 +591,9 @@ public class GameManager : MonoBehaviour
                 break;
 
             case BattlePhase.Shoot:
-               // Debug.Log("commencing charge phase");
-                currentPhase = BattlePhase.Charge;
-               
+                // Debug.Log("commencing charge phase");
+                //currentPhase = BattlePhase.Charge;
+                currentPhase = BattlePhase.Combat;
                 CreateActivationPool();
                 StartTurn();
                 break;
@@ -615,6 +681,109 @@ public class GameManager : MonoBehaviour
 
     }
 
+    public void GetRandomActivation()
+    {
+        if (pTurn == PlayerIndex.P1)
+        {
+            int randomnum = Random.Range(0, player1Units.Count);
+            SelectedUnit = player1Units[randomnum];
+        }
+        else
+        {
+            int randomnum = Random.Range(0, player2Units.Count);
+            SelectedUnit = player2Units[randomnum];
+        }
+    }
+    public void AITakeTurn()
+    {
+        //PassTurn();
+        GetRandomActivation();
+        switch (currentPhase)
+        {
+            case BattlePhase.Casting:
+              
+                break;
+            case BattlePhase.Move:
+                SelectedUnit.GetClosestEnemyUnit();
+                if (SelectedUnit.canShoot)
+                {
+                    //if cna shoot
+                    if (Vector3.Distance(SelectedUnit.unitLeader.transform.position, SelectedUnit.closestenemyunit.transform.position) < SelectedUnit.stats.ranged)
+                    {//if in shooting range
+                        EndTurn();
+                    }
+                    else
+                    {
+                        if (Vector3.Distance(SelectedUnit.unitLeader.transform.position, SelectedUnit.closestenemyunit.transform.position) > SelectedUnit.stats.melee)
+                        {//if outside of melee range, 
+                            Vector3 movevector = Vector3.Normalize((SelectedUnit.unitLeader.transform.position - SelectedUnit.closestenemyunit.transform.position));
+
+                            if (Vector3.Distance(SelectedUnit.unitLeader.transform.position, SelectedUnit.closestenemyunit.transform.position) >= SelectedUnit.stats.move)
+                            { //if farther than max move distance,
+                              //moves the max distance towards closest enemy
+
+                                //Debug.DrawLine(SelectedUnit.unitLeader.transform.position, SelectedUnit.unitLeader.transform.position+ movevector*-SelectedUnit.stats.move,Color.red,5f);
+                                SelectedUnit.MoveUnitLeader(SelectedUnit.unitLeader.transform.position + movevector * -(SelectedUnit.stats.move - 0.5f));
+                            }
+                            else
+                            {
+                                //move to melee range
+                                SelectedUnit.MoveUnitLeader(SelectedUnit.unitLeader.transform.position + movevector * (-Vector3.Distance(SelectedUnit.unitLeader.transform.position, SelectedUnit.closestenemyunit.transform.position) - SelectedUnit.stats.ranged));
+
+                            }
+                        }
+                        else
+                        {
+                            EndTurn();
+                        }
+                    }
+                }
+                else
+                {
+
+
+
+
+
+                    if (Vector3.Distance(SelectedUnit.unitLeader.transform.position, SelectedUnit.closestenemyunit.transform.position) > SelectedUnit.stats.melee)
+                    {//if outside of melee range, 
+                        Vector3 movevector = Vector3.Normalize((SelectedUnit.unitLeader.transform.position - SelectedUnit.closestenemyunit.transform.position));
+
+                        if (Vector3.Distance(SelectedUnit.unitLeader.transform.position, SelectedUnit.closestenemyunit.transform.position) >= SelectedUnit.stats.move)
+                        { //if farther than max move distance,
+                          //moves the max distance towards closest enemy
+
+                            //Debug.DrawLine(SelectedUnit.unitLeader.transform.position, SelectedUnit.unitLeader.transform.position+ movevector*-SelectedUnit.stats.move,Color.red,5f);
+                            SelectedUnit.MoveUnitLeader(SelectedUnit.unitLeader.transform.position + movevector * -(SelectedUnit.stats.move-0.5f));
+                        }
+                        else
+                        {
+                            //move to melee range
+                            SelectedUnit.MoveUnitLeader(SelectedUnit.unitLeader.transform.position + movevector * (-Vector3.Distance(SelectedUnit.unitLeader.transform.position, SelectedUnit.closestenemyunit.transform.position) - SelectedUnit.stats.melee));
+
+                        }
+                    }
+                    else
+                    {
+                        EndTurn();
+                    }
+                }
+            
+                break;
+            case BattlePhase.Shoot:
+                SelectedUnit.GetClosestEnemyUnit();
+
+                SelectedUnit.closestenemyunit.TakeDamage(SelectedUnit.DealRangedDamage(), SelectedUnit.stats.rangeddamage, SelectedUnit.stats.rangedrend);
+                EndTurn();
+                break;
+            case BattlePhase.Combat:
+                SelectedUnit.GetClosestEnemyUnit();
+                SelectedUnit.closestenemyunit.TakeDamage(SelectedUnit.DealMeleeDamage(), SelectedUnit.stats.meleedamage, SelectedUnit.stats.meleerend);
+                EndTurn();
+                break;
+            
+        }
+    }
     public void StartTurn()
     {
         RefreshUI();
@@ -642,6 +811,9 @@ public class GameManager : MonoBehaviour
                 if (player2Units.Count <= 0)
                 {
                     EndTurn();
+                }else if (isvsAI)
+                {
+                    AITakeTurn();
                 }
             }
 

@@ -1,19 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Unit : MonoBehaviour
 {
 
-   
-   
- 
-  
+
+
+
+    public List<Transform> pilepoints = new List<Transform>();
     public bool canMelee = false;
     public bool canShoot=false;
     public bool canCharge = true;
     public bool canCast = false;
-
+    public CombatText hittext;
+    int pileindex = 0;
     int modelindex = 0;
     int modelcount;
     int carriedoverwounds;
@@ -51,24 +53,33 @@ public class Unit : MonoBehaviour
 
         foreach (Unit unit in FindObjectsOfType<Unit>())
         {
-            if (unit.player !=player)
+            if (!unit.isDead)
             {
-               
+                if (unit.player != player)
+                {
 
-                if(Vector3.Distance(unit.transform.position, transform.position )<= closestenemyunitdistance){
-                    closestenemyunit = unit;
-                    closestenemyunitdistance = Vector3.Distance(unit.transform.position, transform.position);
-                    Debug.Log("closest enemy distance: " + closestenemyunitdistance + closestenemyunit);
+
+                    if (Vector3.Distance(unit.transform.position, transform.position) <= closestenemyunitdistance)
+                    {
+                        closestenemyunit = unit;
+                        closestenemyunitdistance = Vector3.Distance(unit.transform.position, transform.position);
+                        Debug.Log("closest enemy distance: " + closestenemyunitdistance + closestenemyunit);
+                    }
+
+
+
                 }
-                
-
-               
             }
         }
       
     }
     void Start()
     {
+       
+           
+       
+        
+     
         caster = FindObjectOfType<ClickCaster>();
         gman = FindObjectOfType<GameManager>();
         chargetool = FindObjectOfType<ChargeTool>();
@@ -94,6 +105,11 @@ public class Unit : MonoBehaviour
                     models.Add(model);
                 }
             }
+        }
+
+       foreach(PilePoint point in GetComponentsInChildren<PilePoint>())
+        {
+            pilepoints.Add(point.transform);
         }
     }
 
@@ -154,7 +170,7 @@ public class Unit : MonoBehaviour
                 model.transform.position -= movevector;
             }
 
-
+            
             hasMoved = true;
             if (GetComponent<Hero>())
             {
@@ -162,9 +178,18 @@ public class Unit : MonoBehaviour
                 hasMoved = false;
                 modelindex = 0;
                 hasActivated = true;
-            Debug.Log("ending turn");
+            if (player == GameManager.PlayerIndex.P1)
+            {
+                gman.pTurn = GameManager.PlayerIndex.P2;
+            }
+            else
+            {
+                gman.pTurn = GameManager.PlayerIndex.P1;
+            }
+            Debug.Log("hero ending turn");
             SelectEffect.SetActive(false);
             gman.EndTurn();
+           
            
 
 
@@ -172,9 +197,15 @@ public class Unit : MonoBehaviour
             }
             else
             {
+            gman.errorText.text = "Pile in your units around the leader you just moved!";
                 //set move tool to leader position and size for cohesion
                 SetMoveTool();
                 moveTool.transform.localScale = new Vector3(5, moveTool.transform.localScale.y, 5);
+
+            if (gman.isvsAI && player == GameManager.PlayerIndex.P2)
+            {
+                AutoPile();
+            }
             }
 
 
@@ -197,7 +228,21 @@ public class Unit : MonoBehaviour
 
     }
 
-   
+   public void AutoPile()
+    {
+      
+       
+            if (pilepoints[pileindex])
+            {
+                MoveModel(pilepoints[pileindex].position);
+                pileindex++;
+            }
+            else
+            {
+                Debug.LogWarning("No pile point assigned to " + name);
+            }
+        
+    }
     public void MoveModel(Vector3 targetpos)
     {
      
@@ -228,17 +273,37 @@ public class Unit : MonoBehaviour
         models[modelindex].transform.LookAt(closestenemyunit.transform.position);
         modelindex++;
 
-
-        if (modelindex > stats.unitMaxSize - 2 - slainmodels)
+        if (gman.isvsAI && player == GameManager.PlayerIndex.P2)
         {
-            moveTool.transform.position = new Vector3(1000, moveTool.transform.position.y, 1000);
-            hasMoved = false;
-            modelindex = 0;
-            hasActivated = true;
-            SelectEffect.SetActive(false);
-            gman.EndTurn();
-        
+            if (pileindex <= stats.unitMaxSize-2-slainmodels)
+            {
+                AutoPile();
+            }
+            else
+            {
+                pileindex = 0;
+                 moveTool.transform.position = new Vector3(1000, moveTool.transform.position.y, 1000);
+                hasMoved = false;
+                modelindex = 0;
+                hasActivated = true;
+                SelectEffect.SetActive(false);
+                gman.EndTurn();
+            }
 
+        }
+        else
+        {
+            if (modelindex > stats.unitMaxSize - 2 - slainmodels)
+            {
+                moveTool.transform.position = new Vector3(1000, moveTool.transform.position.y, 1000);
+                hasMoved = false;
+                modelindex = 0;
+                hasActivated = true;
+                SelectEffect.SetActive(false);
+                gman.EndTurn();
+
+
+            }
         }
     }
 
@@ -418,10 +483,13 @@ public class Unit : MonoBehaviour
         int assignedwounds = carriedoverwounds;
 
         Debug.LogWarning("Had " + carriedoverwounds + "wounds already");
-    
-       
 
-        for(int i=unsavedwounds; i>0; i--)//calculate how many models to remove and how many wounds must be assigned to a model that is still living.
+        hittext.text.text = unsavedwounds.ToString();
+        hittext.text.color = Color.red;
+        hittext.fadetimer = Time.time + 1.5f;
+        hittext.ToggleText(true);
+
+        for (int i=unsavedwounds; i>0; i--)//calculate how many models to remove and how many wounds must be assigned to a model that is still living.
         {
             assignedwounds++;
             if (assignedwounds >= stats.wounds)
@@ -433,16 +501,20 @@ public class Unit : MonoBehaviour
             
         }
         Debug.LogWarning("Need to remove " + modelstoremove + " models and assign "+assignedwounds+ "Wounds");
-        carriedoverwounds = assignedwounds;
-        
-        RemoveModels(modelstoremove);
+       
+         carriedoverwounds = assignedwounds;
+
+        if (modelstoremove > 0)
+        {
+            RemoveModels(modelstoremove);
+        }
 
     }
 
 
     public void RemoveModels(int amounttoremove)
     {
-        if (models.Count > 0)
+        if (models.Count > 0&&amounttoremove<models.Count)
         {
             slainmodels+=amounttoremove;
             for (int i = 0; i < amounttoremove; i++)
@@ -463,9 +535,34 @@ public class Unit : MonoBehaviour
 
             
        
-            unitLeader.GetComponentInChildren<Animator>().SetTrigger("Die");
+           // GetComponentInChildren<Animator>().SetTrigger("Die");
+            foreach (Model model in GetComponentsInChildren<Model>())
+            {
+                model.GetComponentInChildren <Animator>().SetTrigger("Die");
+            }
             unitLeader.transform.parent = null;
-            
+            if (player == GameManager.PlayerIndex.P1)
+            {
+                gman.P1UnitCount--;
+            }
+            else
+            {
+                gman.P2UnitCount--;
+            }
+
+            if (gman.P1UnitCount <= 0)
+            {
+                //  Debug.LogError("Wingame for p2");
+                Destroy(gman.armycon.gameObject);
+                SceneManager.LoadScene("Win_Undead");
+            }
+            else if (gman.P2UnitCount <= 0)
+            {
+                //  Debug.LogError("Wingame for p1");
+                Destroy(gman.armycon.gameObject);
+              
+                SceneManager.LoadScene("Win_Empire");
+            }
             //Destroy(this);
 
         }

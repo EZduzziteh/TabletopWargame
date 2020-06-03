@@ -252,6 +252,7 @@ public class ClickCaster : MonoBehaviour
         {
             if (hit.collider.gameObject.tag != "NotClickable")
             {
+                
                 if (hit.collider.gameObject.GetComponent<Unit>())
                 {
                     if (hit.collider.gameObject.GetComponent<Unit>().hasActivated)
@@ -261,12 +262,14 @@ public class ClickCaster : MonoBehaviour
                     else if (hit.collider.gameObject.GetComponent<Unit>().player == gman.pTurn)
                     {
 
-
-                        gman.SelectedUnit = hit.collider.gameObject.GetComponent<Unit>();
-                        hit.collider.gameObject.GetComponent<Unit>().isSelected = true;
-                        gman.SelectedUnit.SetMoveTool();
-                        gman.SelectedUnit.AnimMove(0.0f);
-                        gman.RefreshUI();
+                        if (!gman.SelectedUnit)
+                        {
+                            gman.SelectedUnit = hit.collider.gameObject.GetComponent<Unit>();
+                            hit.collider.gameObject.GetComponent<Unit>().isSelected = true;
+                            gman.SelectedUnit.SetMoveTool();
+                            gman.SelectedUnit.AnimMove(0.0f);
+                            gman.RefreshUI();
+                        }
 
                     }
                 }
@@ -279,12 +282,14 @@ public class ClickCaster : MonoBehaviour
                     else if (hit.collider.gameObject.GetComponentInParent<Unit>().player == gman.pTurn)
                     {
 
-
-                        gman.SelectedUnit = hit.collider.gameObject.GetComponentInParent<Unit>();
-                        hit.collider.gameObject.GetComponentInParent<Unit>().isSelected = true;
-                        gman.SelectedUnit.SetMoveTool();
-                        gman.SelectedUnit.AnimMove(0.0f);
-                        gman.RefreshUI();
+                        if (!gman.SelectedUnit)
+                        {
+                            gman.SelectedUnit = hit.collider.gameObject.GetComponentInParent<Unit>();
+                            hit.collider.gameObject.GetComponentInParent<Unit>().isSelected = true;
+                            gman.SelectedUnit.SetMoveTool();
+                            gman.SelectedUnit.AnimMove(0.0f);
+                            gman.RefreshUI();
+                        }
 
                     }
                 }
@@ -423,8 +428,18 @@ public class ClickCaster : MonoBehaviour
                     hit.collider.gameObject.GetComponent<Unit>().isSelected = true;
                      gman.SelectedUnit.chargedist = Random.Range(1, 13);
 
-                      gman.SelectedUnit.SetChargeTool();
-                    gman.RefreshUI();
+                    gman.GetClosestEnemyModelToPoint(gman.SelectedUnit.transform.position, gman.SelectedUnit.player);
+                    if (gman.closestdist <= gman.SelectedUnit.chargedist)
+                    {
+                        gman.SelectedUnit.SetChargeTool();
+                        gman.RefreshUI();
+                    }
+                    else
+                    {
+                        gman.EndTurn();
+                    }
+                    //gman.SelectedUnit.SetChargeTool();
+                  //  gman.RefreshUI();
 
                 }
             }

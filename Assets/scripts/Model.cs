@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Model : MonoBehaviour
 {
+ 
     public Vector3 startpos;
     public float currenttime=0f;
     public Vector3 endpos;
@@ -21,6 +22,7 @@ public class Model : MonoBehaviour
 
     private void Update()
     {
+      
        /* if (Input.GetKeyDown(KeyCode.H))
         {
             LerpToPos(transform.position*10f, 4);
@@ -47,7 +49,15 @@ public class Model : MonoBehaviour
         ismoving = true;
     }
 
-
+    public void Startsink()
+    {
+        gameObject.AddComponent<Rigidbody>();
+        GetComponent<Collider>().enabled = false;
+        GetComponent<Rigidbody>().mass = 1;
+        GetComponent<Rigidbody>().drag = 30;
+        GetComponent<Rigidbody>().useGravity = true;
+        
+    }
 
     // Update is called once per frame
     /* void fixedUpdate()

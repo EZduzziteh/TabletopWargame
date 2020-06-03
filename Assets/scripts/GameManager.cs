@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public float turndelay = 2f;
+    public ClickCaster caster;
     public bool isvsAI=false;
     public List<Unit> player1Units = new List<Unit>();
     public List<Unit> player2Units = new List<Unit>();
@@ -67,6 +69,7 @@ public class GameManager : MonoBehaviour
     {
         armycon = FindObjectOfType<ArmyConstructor>();
         armycon.SpawnArmy();
+        caster = FindObjectOfType<ClickCaster>();
 
         foreach( Unit unit in FindObjectsOfType<Unit>())
         {
@@ -83,6 +86,7 @@ public class GameManager : MonoBehaviour
                 unit.transform.position = p2spawnpoints[P2UnitCount].transform.position;
                 P2UnitCount++;
             }
+            
         }
         CreateActivationPool();
         StartTurn();
@@ -325,6 +329,7 @@ public class GameManager : MonoBehaviour
                 errorText.text = "Casting phase, Left click a highlighted unit to cast a spell or ability.";
                 foreach (Unit unit in FindObjectsOfType<Unit>())
                 {
+                    //unit.linefix.UpdateLine();
                     if (!unit.isDead){
                         if (unit.canCast)
                         {
@@ -333,13 +338,13 @@ public class GameManager : MonoBehaviour
                             if (unit.player == PlayerIndex.P1)
                             {
                                 player1Units.Add(unit);
-
+                                unit.SelectEffect.SetActive(true);
                             }
                             else
                             {
                                 player2Units.Add(unit);
                             }
-                            unit.SelectEffect.SetActive(true);
+                           
                         } }
                 }
                 if (player1Units.Count <= 0 && player2Units.Count <= 0)
@@ -357,12 +362,13 @@ public class GameManager : MonoBehaviour
                         if (unit.player == PlayerIndex.P1)
                         {
                             player1Units.Add(unit);
+                            unit.SelectEffect.SetActive(true);
                         }
                         else
                         {
                             player2Units.Add(unit);
                         }
-                        unit.SelectEffect.SetActive(true);
+                     
                     }
                 }
                 errorText.text = "Move phase, Left click a highlighted unit to move.";
@@ -385,12 +391,13 @@ public class GameManager : MonoBehaviour
                                 if (unit.player == PlayerIndex.P1)
                                 {
                                     player1Units.Add(unit);
+                                    unit.SelectEffect.SetActive(true);
                                 }
                                 else
                                 {
                                     player2Units.Add(unit);
                                 }
-                                unit.SelectEffect.SetActive(true);
+                               
                             }
                         }
                     }
@@ -430,6 +437,7 @@ public class GameManager : MonoBehaviour
 
 
                                         player1Units.Add(unit);
+                                        unit.SelectEffect.SetActive(true);
                                     }
                                     else
                                     {
@@ -437,7 +445,7 @@ public class GameManager : MonoBehaviour
 
                                         player2Units.Add(unit);
                                     }
-                                    unit.SelectEffect.SetActive(true);
+                                  
                                 }
                             }
                         }
@@ -466,12 +474,13 @@ public class GameManager : MonoBehaviour
                                 if (unit.player == PlayerIndex.P1)
                                 {
                                     player1Units.Add(unit);
+                                    unit.SelectEffect.SetActive(true);
                                 }
                                 else
                                 {
                                     player2Units.Add(unit);
                                 }
-                                unit.SelectEffect.SetActive(true);
+                              
                             }
                         }
                         }
@@ -491,12 +500,13 @@ public class GameManager : MonoBehaviour
                             if (unit.player == PlayerIndex.P1)
                             {
                                 player1Units.Add(unit);
+                                unit.SelectEffect.SetActive(true);
                             }
                             else
                             {
                                 player2Units.Add(unit);
                             }
-                            unit.SelectEffect.SetActive(true);
+                            
                         }
                     }
                 }
@@ -623,18 +633,21 @@ public class GameManager : MonoBehaviour
 
         }
     }
+   
+
+
     public void EndTurn()
     {
-        foreach(Unit unit in FindObjectsOfType<Unit>())
+        foreach (Unit unit in FindObjectsOfType<Unit>())
         {
             if (unit.isDead)
             {
                 RemoveFromActivations(unit);
             }
         }
-       
+
         if (SelectedUnit)
-            
+
         {
             SelectedUnit.SelectEffect.SetActive(false);
             //reset tools
@@ -666,18 +679,18 @@ public class GameManager : MonoBehaviour
         {
             case PlayerIndex.P1:
                 pTurn = PlayerIndex.P2;
-                StartTurn();
+                StartCoroutine(TimeDelay(turndelay, "StartTurn"));
                 break;
             case PlayerIndex.P2:
                 pTurn = PlayerIndex.P1;
-                StartTurn();
+                StartCoroutine(TimeDelay(turndelay, "StartTurn"));
                 break;
-            /*case PlayerIndex.P3:
-                break;
-            case PlayerIndex.P4:
-                break;*/
+                /*case PlayerIndex.P3:
+                    break;
+                case PlayerIndex.P4:
+                    break;*/
         }
-        
+       
 
     }
 
@@ -839,5 +852,22 @@ public class GameManager : MonoBehaviour
 
     }
 
-   
+
+    IEnumerator TimeDelay(float seconds, string functiontocall)
+    {
+        //Print the time of when the function is first called.
+        // Debug.Log("Started Coroutine at timestamp : " + Time.time);
+
+        //yield on a new YieldInstruction that waits for 5 seconds.
+        yield return new WaitForSeconds(seconds);
+
+        //After we have waited 5 seconds print the time again.
+        // Debug.Log("Finished Coroutine at timestamp : " + Time.time);
+        // FinishMovingLeader();
+        Invoke(functiontocall, 0);
+        caster.disabled = false;
+
+    }
+
+
 }

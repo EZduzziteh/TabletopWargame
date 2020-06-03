@@ -7,7 +7,7 @@ public class Unit : MonoBehaviour
 {
 
 
-
+    public LineFixer linefix;
 
     public List<Transform> pilepoints = new List<Transform>();
     public bool canMelee = false;
@@ -75,10 +75,10 @@ public class Unit : MonoBehaviour
     }
     void Start()
     {
-       
-           
-       
-        
+
+
+        //linefix = GetComponentInChildren<LineFixer>();
+      // linefix.UpdateLine();
      
         caster = FindObjectOfType<ClickCaster>();
         gman = FindObjectOfType<GameManager>();
@@ -150,11 +150,16 @@ public class Unit : MonoBehaviour
         else
         {
             gman.errorText.text = "Too far!";
+            if (player == GameManager.PlayerIndex.P2 && gman.isvsAI)
+            {
+                AutoPile();
+            }
         }
     }
 
         public void FinishMovingLeader()
         {
+        linefix.UpdateLine();
         //make leader face closest enemy
         GetClosestEnemyUnit();
         //FinishMovingLeader();
@@ -268,6 +273,7 @@ public class Unit : MonoBehaviour
     }
     public void FinishMovingModel()
     {
+        linefix.UpdateLine();
         GetClosestEnemyUnit();
 
         models[modelindex].transform.LookAt(closestenemyunit.transform.position);
@@ -521,6 +527,7 @@ public class Unit : MonoBehaviour
             {
 
                 models[0].GetComponentInChildren<Animator>().SetTrigger("Die");
+                models[0].Startsink();
 
                 models[0].transform.parent = null;
                 models.RemoveAt(0);

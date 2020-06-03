@@ -2331,6 +2331,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57ecfa5e934811549bf397f9988db8fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  turndelay: 0.75
+  caster: {fileID: 0}
+  isvsAI: 1
   player1Units: []
   player2Units: []
   player1ActivatedUnits: []
@@ -2365,8 +2368,11 @@ MonoBehaviour:
   closestdist: 0
   closetunit: {fileID: 0}
   closestmodel: {fileID: 0}
+  p1spawnpoints: []
+  p2spawnpoints: []
   SelectedUnit: {fileID: 0}
   SelectedTarget: {fileID: 0}
+  armycon: {fileID: 0}
   currentPhase: 1
   pTurn: 0
 --- !u!1 &243844637462914006
@@ -2727,6 +2733,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 243844637703918743}
+  - component: {fileID: 1218218713735272663}
   m_Layer: 0
   m_Name: agictool
   m_TagString: Untagged
@@ -2749,6 +2756,18 @@ Transform:
   m_Father: {fileID: 243844636207210292}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1218218713735272663
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 243844637703918740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5c1ffd3025051c4db6b0db48727ae6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &243844637740564560
 GameObject:
   m_ObjectHideFlags: 0
@@ -3345,6 +3364,18 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: closest model
+--- !u!114 &6017894675759912245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1824643293991595371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f4fd03eb1bb4e44682195ab2e930111, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3353973607996174399
 GameObject:
   m_ObjectHideFlags: 0
@@ -3458,11 +3489,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: magicdisttool
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6403166470546412275, guid: c597082378270f34fb193831d8ddf2f9, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: c597082378270f34fb193831d8ddf2f9, type: 3}
 --- !u!4 &1824643293991595367 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1887043493870120324, guid: c597082378270f34fb193831d8ddf2f9,
+    type: 3}
+  m_PrefabInstance: {fileID: 243844637188276451}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1824643293991595371 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1887043493870120328, guid: c597082378270f34fb193831d8ddf2f9,
     type: 3}
   m_PrefabInstance: {fileID: 243844637188276451}
   m_PrefabAsset: {fileID: 0}

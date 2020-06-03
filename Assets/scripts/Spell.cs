@@ -28,6 +28,9 @@ public class Spell : MonoBehaviour
     {
         
         gman = FindObjectOfType<GameManager>();
+        attacktool = FindObjectOfType<MagicTool>().gameObject;
+        distancetool = FindObjectOfType<MagicDistTool>().gameObject;
+            
     }
 
     private void Update()

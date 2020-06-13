@@ -5,10 +5,11 @@ using UnityEngine.SceneManagement;
 
 public class Unit : MonoBehaviour
 {
+    public bool isthreatened=false;
+    public float basesize=0.5f;
+ //   public LineFixer linefix;
 
-
-    public LineFixer linefix;
-
+    public float cohesionDist = 2.5f;
     public List<Transform> pilepoints = new List<Transform>();
     public bool canMelee = false;
     public bool canShoot=false;
@@ -40,7 +41,7 @@ public class Unit : MonoBehaviour
 
 
     public Unit closestenemyunit;
-    public Model closestenemymodel;
+    
     public float closestenemyunitdistance=1000f;
     // Owning player
     public GameManager.PlayerIndex player = GameManager.PlayerIndex.P1;
@@ -137,13 +138,29 @@ public class Unit : MonoBehaviour
     }
     public void MoveUnitLeader(Vector3 targetpos)
     {
+        //trigger movement animation
         AnimMove(0.6f);
-        if (Vector3.Distance(targetpos, unitLeader.gameObject.transform.position) <= stats.move)
+        float moveamount = 0;
+
+        //check if threatened
+        if (isthreatened)
         {
+             moveamount = 0.5f*stats.move;
+            Debug.Log("Threatened, movement cut in half.");
+        }
+        else
+        {
+            moveamount = stats.move;
+        }
+
+        if (Vector3.Distance(targetpos, unitLeader.gameObject.transform.position) <= moveamount)
+        {
+            GetClosestEnemyUnit();
+            unitLeader.transform.LookAt(closestenemyunit.transform.position);
             float dist = Vector3.Distance(unitLeader.gameObject.transform.position, targetpos);
-            unitLeader.GetComponent<Model>().LerpToPos(targetpos, dist/stats.move);
+            unitLeader.GetComponent<Model>().MoveToPos(targetpos);//LerpToPos(targetpos, dist/stats.move);
             caster.disabled = true;
-            StartCoroutine(TimeDelay(dist/stats.move,"FinishMovingLeader"));
+            StartCoroutine(TimeDelay(2f,"FinishMovingLeader"));
 
 
         }
@@ -159,7 +176,7 @@ public class Unit : MonoBehaviour
 
         public void FinishMovingLeader()
         {
-        linefix.UpdateLine();
+      //  linefix.UpdateLine();
         //make leader face closest enemy
         GetClosestEnemyUnit();
         //FinishMovingLeader();
@@ -205,7 +222,7 @@ public class Unit : MonoBehaviour
             gman.errorText.text = "Pile in your units around the leader you just moved!";
                 //set move tool to leader position and size for cohesion
                 SetMoveTool();
-                moveTool.transform.localScale = new Vector3(5, moveTool.transform.localScale.y, 5);
+                moveTool.transform.localScale = new Vector3(cohesionDist*2f, moveTool.transform.localScale.y, cohesionDist*2f);
 
             if (gman.isvsAI && player == GameManager.PlayerIndex.P2)
             {
@@ -254,12 +271,34 @@ public class Unit : MonoBehaviour
         //-1 for leader and -1 because array.
         if (modelindex <= stats.unitMaxSize - 2 - slainmodels)
         {
-            if (Vector3.Distance(targetpos, unitLeader.transform.position) <= 2.5)
+            if (gman.isvsAI && gman.pTurn == GameManager.PlayerIndex.P2)
+            {
+                //move anyways if ai
+                float dist = Vector3.Distance(targetpos, models[modelindex].transform.position);
+                models[modelindex].MoveToPos(targetpos);//LerpToPos(targetpos, dist/stats.move);//transform.position = new Vector3(targetpos.x, unitLeader.transform.position.y, targetpos.z);
+                caster.disabled = true;
+                if (isthreatened)
+                {
+                    StartCoroutine(TimeDelay(0f, "FinishMovingModel"));
+                }
+                else
+                {
+                    StartCoroutine(TimeDelay(0f, "FinishMovingModel"));
+                }
+            }
+            else if (Vector3.Distance(targetpos, unitLeader.transform.position) <= cohesionDist)
             {
                 float dist = Vector3.Distance(targetpos, models[modelindex].transform.position);
-                models[modelindex].LerpToPos(targetpos, dist/stats.move);//transform.position = new Vector3(targetpos.x, unitLeader.transform.position.y, targetpos.z);
+                models[modelindex].MoveToPos(targetpos);//LerpToPos(targetpos, dist/stats.move);//transform.position = new Vector3(targetpos.x, unitLeader.transform.position.y, targetpos.z);
                 caster.disabled = true;
-                StartCoroutine(TimeDelay(dist/stats.move, "FinishMovingModel"));
+                if (isthreatened)
+                {
+                    StartCoroutine(TimeDelay(0f, "FinishMovingModel"));
+                }
+                else
+                {
+                    StartCoroutine(TimeDelay(0f, "FinishMovingModel"));
+                }
                 
             }
             else
@@ -273,7 +312,7 @@ public class Unit : MonoBehaviour
     }
     public void FinishMovingModel()
     {
-        linefix.UpdateLine();
+      //  linefix.UpdateLine();
         GetClosestEnemyUnit();
 
         models[modelindex].transform.LookAt(closestenemyunit.transform.position);
@@ -576,9 +615,18 @@ public class Unit : MonoBehaviour
     }
     public void SetMoveTool()
     {
+
         moveTool.gameObject.SetActive(true);
         moveTool.transform.position = new Vector3(unitLeader.transform.position.x, moveTool.transform.position.y, unitLeader.transform.position.z);
-        moveTool.transform.localScale = new Vector3(stats.move*2, moveTool.transform.localScale.y, stats.move*2);
+        if (isthreatened)
+        {
+            moveTool.transform.localScale = new Vector3(stats.move , moveTool.transform.localScale.y, stats.move);
+        }
+        else
+        {
+            moveTool.transform.localScale = new Vector3(stats.move * 2, moveTool.transform.localScale.y, stats.move * 2);
+        }
+       
     }
     public void SetChargeTool()
     {

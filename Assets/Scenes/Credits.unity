@@ -44,7 +44,7 @@ RenderSettings:
 LightmapSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 11
-  m_GIWorkflowMode: 1
+  m_GIWorkflowMode: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -621,8 +621,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -603, y: -455}
-  m_SizeDelta: {x: 1149.2, y: 253.6}
+  m_AnchoredPosition: {x: -603, y: -437.58}
+  m_SizeDelta: {x: 1149.2, y: 330.37}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1065807796
 MonoBehaviour:
@@ -694,8 +694,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 49.400024, y: -45.590027}
-  m_SizeDelta: {x: 1217.4, y: 277.5}
+  m_AnchoredPosition: {x: 48, y: -119}
+  m_SizeDelta: {x: 1217.4, y: 444.7}
   m_Pivot: {x: 0.5, y: 0.2926262}
 --- !u!114 &1130131747
 MonoBehaviour:
@@ -729,7 +729,9 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "Programming and Game Design by Sasha Greene\nCharacter Models by Polygon
-    Blacksmith\nEnvironmental Models by BrokenVector\nMenu Images by Zonked \n\n\n"
+    Blacksmith\nEnvironmental Models by BrokenVector\nMenu Images by Zonked \nMain
+    theme \"Battle Theme A\" - cynicmusic\nBattle themef \"Battle in the Winter\"
+    - Jobromedia\n\n\n"
 --- !u!222 &1130131748
 CanvasRenderer:
   m_ObjectHideFlags: 0

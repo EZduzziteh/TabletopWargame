@@ -640,6 +640,23 @@ public class GameManager : MonoBehaviour
     {
         foreach (Unit unit in FindObjectsOfType<Unit>())
         {
+
+
+            //if within threat range melee
+            unit.GetClosestEnemyUnit();
+            if (unit.closestenemyunit.stats)
+            {
+                if (unit.closestenemyunitdistance <= unit.closestenemyunit.stats.melee)
+                {
+                    unit.isthreatened = true;
+                }
+                else
+                {
+                    unit.isthreatened = false;
+                }
+            }
+
+
             if (unit.isDead)
             {
                 RemoveFromActivations(unit);

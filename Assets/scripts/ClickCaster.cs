@@ -327,13 +327,14 @@ public class ClickCaster : MonoBehaviour
                         //#TODO
                         //Debug.Log("#TODO Handle Ranged Damage");
                         gman.SelectedTarget.TakeDamage(gman.SelectedUnit.DealRangedDamage(), gman.SelectedUnit.stats.rangeddamage, gman.SelectedUnit.stats.rangedrend);
+                        gman.EndTurn();
                     }
                     
                     else
                     {
                         gman.errorText.text = "That unit is not in shooting range";
                     }
-                    gman.EndTurn();
+                   
 
                 }
                 else if (hit.collider.gameObject.GetComponent<Unit>().canShoot)
@@ -371,6 +372,7 @@ public class ClickCaster : MonoBehaviour
                         //#TODO
                         //Debug.Log("#TODO Handle Ranged Damage");
                         gman.SelectedTarget.TakeDamage(gman.SelectedUnit.DealRangedDamage(), gman.SelectedUnit.stats.rangeddamage, gman.SelectedUnit.stats.rangedrend);
+                        gman.EndTurn();
                     }
 
                     else
@@ -378,7 +380,7 @@ public class ClickCaster : MonoBehaviour
                         gman.errorText.text = "That unit is not in shooting range";
                     }
 
-                    gman.EndTurn();
+                   
                 
                 }
                 else if (hit.collider.gameObject.GetComponentInParent<Unit>().canShoot)
@@ -517,12 +519,13 @@ public class ClickCaster : MonoBehaviour
                         //#TODO
                         //Debug.Log("#TODO Handle melee Damage");
                         gman.SelectedTarget.TakeDamage(gman.SelectedUnit.DealMeleeDamage(), gman.SelectedUnit.stats.meleedamage, gman.SelectedUnit.stats.meleerend);
+                        gman.EndTurn();
                     }
                     else
                     {
                         gman.errorText.text = "That unit is not in melee range";
                     }
-                    gman.EndTurn();
+                    
 
                 }
                 else if (hit.collider.gameObject.GetComponent<Unit>().canMelee)
@@ -559,6 +562,7 @@ public class ClickCaster : MonoBehaviour
                         // Debug.Log("#TODO Handle melee Damage");
 
                         gman.SelectedTarget.TakeDamage(gman.SelectedUnit.DealMeleeDamage(), gman.SelectedUnit.stats.meleedamage, gman.SelectedUnit.stats.meleerend);
+                        gman.EndTurn();
                     }
                     
                     else
@@ -566,7 +570,7 @@ public class ClickCaster : MonoBehaviour
                         gman.errorText.text = "That unit is not in melee range";
                     }
 
-                    gman.EndTurn();
+                
 
                 }
                 else if (hit.collider.gameObject.GetComponentInParent<Unit>().canMelee)

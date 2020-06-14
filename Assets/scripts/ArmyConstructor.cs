@@ -12,6 +12,8 @@ public class ArmyConstructor : MonoBehaviour
     public Text errorText;
     public string scenetoload = "Village_01";
 
+    public List<Text> storytext=new List<Text>();
+
         public List<GameObject> unitprefabs = new List<GameObject>();
         public List<string> units = new List<string>();
 
@@ -84,6 +86,25 @@ public class ArmyConstructor : MonoBehaviour
     {
         scenetoload = scenename;
        
+        foreach(Text text in storytext)
+        {
+            text.transform.parent.gameObject.SetActive(false);
+        }
+        switch (scenename)
+        {
+            case "Graveyard_01":
+                storytext[0].transform.parent.gameObject.SetActive(true);
+                break;
+            case "Village_Outskirts_01":
+                storytext[1].transform.parent.gameObject.SetActive(true);
+                break;
+            case "Mage_Tower_01":
+                storytext[2].transform.parent.gameObject.SetActive(true);
+                break;
+            case "Village_01":
+                storytext[3].transform.parent.gameObject.SetActive(true);
+                break;
+        }
     }
     public void BackToMenu()
     {

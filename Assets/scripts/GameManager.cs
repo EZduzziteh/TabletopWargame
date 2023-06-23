@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour
     public List<SpawnPoint> p1spawnpoints=new List<SpawnPoint>();
     public List<SpawnPoint> p2spawnpoints = new List<SpawnPoint>();
 
-    public enum BattlePhase { Order, Casting, Move, Shoot, Charge, Combat, Rally };
+    public enum BattlePhase { Casting, Move, Shoot, Combat,  };
 
     public enum PlayerIndex { P1,P2/*,P3,P4*/};
 
@@ -106,12 +106,7 @@ public class GameManager : MonoBehaviour
             player2Units.Remove(unit);
         }
     }
-    private void Update()
-    {
-
-     
-      
-    }
+    
 
     public void ShowSelectedAttackRange()
     {
@@ -409,54 +404,7 @@ public class GameManager : MonoBehaviour
                     EndTurn();
                 }
                 break;
-            case BattlePhase.Charge:
-                foreach (Unit unit in FindObjectsOfType<Unit>())
-                {
-                    unit.hasActivated = false;
-                   // unit.canCharge = true;
-
-                   
-
-
-                    //dont add to charge pool if shot this turn
-                    if (!unit.isDead)
-                    {
-                        if (!unit.hasshot)
-                        {
-
-
-
-                            if (unit.canCharge)
-                            {
-                                unit.GetClosestEnemyUnit();
-
-                                if (unit.closestenemyunitdistance <= 12.0f && unit.closestenemyunitdistance >= 3.0f)//charge distance
-                                {
-                                    if (unit.player == PlayerIndex.P1)
-                                    {
-
-
-                                        player1Units.Add(unit);
-                                        unit.SelectEffect.SetActive(true);
-                                    }
-                                    else
-                                    {
-
-
-                                        player2Units.Add(unit);
-                                    }
-                                  
-                                }
-                            }
-                        }
-                        
-                    }
-
-                    
-                    closestdist = Mathf.Infinity;
-                }
-                errorText.text = "Charge phase, left click a highlighted unit to charge.";
-                break;
+            
             case BattlePhase.Combat:
                 foreach (Unit unit in FindObjectsOfType<Unit>())
                 {
@@ -488,30 +436,7 @@ public class GameManager : MonoBehaviour
                 }
                 errorText.text = "Combat phase, Select a highlighted unit to fight.";
                 break;
-            case BattlePhase.Rally:
-                foreach (Unit unit in FindObjectsOfType<Unit>())
-                {
-                    unit.hasActivated = false;
-
-                    if (!unit.isDead)
-                    {
-                        if (unit.hasbattleshock)
-                        {
-                            if (unit.player == PlayerIndex.P1)
-                            {
-                                player1Units.Add(unit);
-                                unit.SelectEffect.SetActive(true);
-                            }
-                            else
-                            {
-                                player2Units.Add(unit);
-                            }
-                            
-                        }
-                    }
-                }
-                errorText.text = "Rally phase: Select a unit.";
-                break;
+            
 
 
      
@@ -608,26 +533,15 @@ public class GameManager : MonoBehaviour
                 StartTurn();
                 break;
 
-            case BattlePhase.Charge:
-             //   Debug.Log("commencing combat phase");
-                currentPhase = BattlePhase.Combat;
-                CreateActivationPool();
-                StartTurn();
-                break;
 
             case BattlePhase.Combat:
-             //   Debug.Log("commencing battleshock phase");
-                currentPhase = BattlePhase.Rally;
-                CreateActivationPool();
-                StartTurn();
-                break;
-
-            case BattlePhase.Rally:
+                //   Debug.Log("commencing battleshock phase");
                 currentPhase = BattlePhase.Casting;
                 CreateActivationPool();
                 StartTurn();
-
                 break;
+
+           
 
 
 
@@ -670,7 +584,7 @@ public class GameManager : MonoBehaviour
             //reset tools
 
             SelectedUnit.moveTool.transform.position = new Vector3(-100f, SelectedUnit.moveTool.transform.position.y, -100f);
-            SelectedUnit.chargetool.transform.position = new Vector3(-100f, SelectedUnit.chargetool.transform.position.y, -100f);
+        
             SelectedUnit.attacktool.transform.position = new Vector3(-100f, SelectedUnit.attacktool.transform.position.y, -100f);
             SelectedUnit.shoottool.transform.position = new Vector3(-100f, SelectedUnit.shoottool.transform.position.y, -100f);
             if (SelectedUnit.GetComponent<Spell>())

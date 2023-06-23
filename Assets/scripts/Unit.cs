@@ -13,14 +13,12 @@ public class Unit : MonoBehaviour
     public List<Transform> pilepoints = new List<Transform>();
     public bool canMelee = false;
     public bool canShoot=false;
-    public bool canCharge = true;
     public bool canCast = false;
     public CombatText hittext;
     int pileindex = 0;
     int modelindex = 0;
     int modelcount;
     int carriedoverwounds;
-    public int chargedist;
     public int modelslostthisturn=0;
     public int slainmodels=0;
     public bool isDead = false;
@@ -28,14 +26,12 @@ public class Unit : MonoBehaviour
     public bool hasActivated = false;
     public bool hasMoved = false;
     public bool hasshot = false;
-    public bool hasbattleshock;
     public Leader unitLeader;
     public List<Model> models = new List<Model>();
     public GameManager gman;
     public MovementTool moveTool;
     public AttackTool attacktool;
     public ShootTool shoottool;
-    public ChargeTool chargetool;
     public ClickCaster caster;
     public GameObject SelectEffect;
 
@@ -58,7 +54,7 @@ public class Unit : MonoBehaviour
             {
                 if (unit.player != player)
                 {
-
+                        //#TODO make this find the closest enemy model, as the closest unit is measured from the unit leader.
 
                     if (Vector3.Distance(unit.transform.position, transform.position) <= closestenemyunitdistance)
                     {
@@ -74,6 +70,13 @@ public class Unit : MonoBehaviour
         }
       
     }
+
+    public void Awake()
+    {
+
+        stats = GetComponent<BaseStats>();
+    }
+
     void Start()
     {
 
@@ -83,11 +86,9 @@ public class Unit : MonoBehaviour
      
         caster = FindObjectOfType<ClickCaster>();
         gman = FindObjectOfType<GameManager>();
-        chargetool = FindObjectOfType<ChargeTool>();
         moveTool = FindObjectOfType<MovementTool>();
         attacktool = FindObjectOfType<AttackTool>();
         shoottool = FindObjectOfType<ShootTool>();
-        stats = GetComponent<BaseStats>();
         //SelectEffect.SetActive(false);
         if (GetComponent<Hero>())
         {
@@ -114,11 +115,6 @@ public class Unit : MonoBehaviour
         }
     }
 
-
-    private void Update()
-    {
-       
-    }
 
 
     IEnumerator TimeDelay(float seconds, string functiontocall)
@@ -172,14 +168,13 @@ public class Unit : MonoBehaviour
                 AutoPile();
             }
         }
+
+        AutoPile();
     }
 
         public void FinishMovingLeader()
         {
-      //  linefix.UpdateLine();
-        //make leader face closest enemy
         GetClosestEnemyUnit();
-        //FinishMovingLeader();
         unitLeader.transform.LookAt(closestenemyunit.transform.position);
 
             Vector3 movevector = unitLeader.transform.position - transform.position;
@@ -219,19 +214,21 @@ public class Unit : MonoBehaviour
             }
             else
             {
-            gman.errorText.text = "Pile in your units around the leader you just moved!";
+            AutoPile();
+            /*gman.errorText.text = "Pile in your units around the leader you just moved!";
                 //set move tool to leader position and size for cohesion
                 SetMoveTool();
                 moveTool.transform.localScale = new Vector3(cohesionDist*2f, moveTool.transform.localScale.y, cohesionDist*2f);
-
+            Debug.Log("pile in");
             if (gman.isvsAI && player == GameManager.PlayerIndex.P2)
             {
+                Debug.Log("moving ai");
                 AutoPile();
-            }
-            }
+            }*/
+        }
 
 
-        
+
 
 
         if (GetComponentsInChildren<Model>().Length<=1) 
@@ -271,63 +268,87 @@ public class Unit : MonoBehaviour
         //-1 for leader and -1 because array.
         if (modelindex <= stats.unitMaxSize - 2 - slainmodels)
         {
-            if (gman.isvsAI && gman.pTurn == GameManager.PlayerIndex.P2)
+
+            float dist = Vector3.Distance(targetpos, models[modelindex].transform.position);
+            models[modelindex].MoveToPos(targetpos);//LerpToPos(targetpos, dist/stats.move);//transform.position = new Vector3(targetpos.x, unitLeader.transform.position.y, targetpos.z);
+            caster.disabled = true;
+            if (isthreatened)
             {
-                //move anyways if ai
-                float dist = Vector3.Distance(targetpos, models[modelindex].transform.position);
-                models[modelindex].MoveToPos(targetpos);//LerpToPos(targetpos, dist/stats.move);//transform.position = new Vector3(targetpos.x, unitLeader.transform.position.y, targetpos.z);
-                caster.disabled = true;
-                if (isthreatened)
-                {
-                    StartCoroutine(TimeDelay(0f, "FinishMovingModel"));
-                }
-                else
-                {
-                    StartCoroutine(TimeDelay(0f, "FinishMovingModel"));
-                }
-            }
-            else if (Vector3.Distance(targetpos, unitLeader.transform.position) <= cohesionDist)
-            {
-                float dist = Vector3.Distance(targetpos, models[modelindex].transform.position);
-                models[modelindex].MoveToPos(targetpos);//LerpToPos(targetpos, dist/stats.move);//transform.position = new Vector3(targetpos.x, unitLeader.transform.position.y, targetpos.z);
-                caster.disabled = true;
-                if (isthreatened)
-                {
-                    StartCoroutine(TimeDelay(0f, "FinishMovingModel"));
-                }
-                else
-                {
-                    StartCoroutine(TimeDelay(0f, "FinishMovingModel"));
-                }
-                
+                StartCoroutine(TimeDelay(1.1f, "FinishMovingModel"));
             }
             else
             {
-                gman.errorText.text = "That Unit is Too Far from leader";
-               
+                StartCoroutine(TimeDelay(1.1f, "FinishMovingModel"));
             }
-           
-          
+
+
+
+
+
+
+
+
+
+            //if (gman.isvsAI && gman.pTurn == GameManager.PlayerIndex.P2)
+            // {
+            /*//move anyways if ai
+            float dist = Vector3.Distance(targetpos, models[modelindex].transform.position);
+            models[modelindex].MoveToPos(targetpos);//LerpToPos(targetpos, dist/stats.move);//transform.position = new Vector3(targetpos.x, unitLeader.transform.position.y, targetpos.z);
+            caster.disabled = true;
+            if (isthreatened)
+            {
+                StartCoroutine(TimeDelay(0f, "FinishMovingModel"));
+            }
+            else
+            {
+                StartCoroutine(TimeDelay(0f, "FinishMovingModel"));
+            }*/
+            // }
+            /*
+             else if (Vector3.Distance(targetpos, unitLeader.transform.position) <= cohesionDist)
+             {
+                 float dist = Vector3.Distance(targetpos, models[modelindex].transform.position);
+                 models[modelindex].MoveToPos(targetpos);//LerpToPos(targetpos, dist/stats.move);//transform.position = new Vector3(targetpos.x, unitLeader.transform.position.y, targetpos.z);
+                 caster.disabled = true;
+                 if (isthreatened)
+                 {
+                     StartCoroutine(TimeDelay(0f, "FinishMovingModel"));
+                 }
+                 else
+                 {
+                     StartCoroutine(TimeDelay(0f, "FinishMovingModel"));
+                 }
+
+             }
+             else
+             {
+                 gman.errorText.text = "That Unit is Too Far from leader";
+
+             }
+             */
+
+
         }
     }
     public void FinishMovingModel()
     {
-      //  linefix.UpdateLine();
+
         GetClosestEnemyUnit();
 
+        //set the model that just moved to look at the closest enemy unit.
         models[modelindex].transform.LookAt(closestenemyunit.transform.position);
         modelindex++;
 
         if (gman.isvsAI && player == GameManager.PlayerIndex.P2)
         {
-            if (pileindex <= stats.unitMaxSize-2-slainmodels)
+            if (pileindex <= stats.unitMaxSize - 2 - slainmodels)
             {
                 AutoPile();
             }
             else
             {
                 pileindex = 0;
-                 moveTool.transform.position = new Vector3(1000, moveTool.transform.position.y, 1000);
+                moveTool.transform.position = new Vector3(1000, moveTool.transform.position.y, 1000);
                 hasMoved = false;
                 modelindex = 0;
                 hasActivated = true;
@@ -338,17 +359,32 @@ public class Unit : MonoBehaviour
         }
         else
         {
-            if (modelindex > stats.unitMaxSize - 2 - slainmodels)
+            if (pileindex <= stats.unitMaxSize - 2 - slainmodels)
             {
+                AutoPile();
+            }
+            else
+            {
+                pileindex = 0;
                 moveTool.transform.position = new Vector3(1000, moveTool.transform.position.y, 1000);
                 hasMoved = false;
                 modelindex = 0;
                 hasActivated = true;
                 SelectEffect.SetActive(false);
                 gman.EndTurn();
-
-
             }
+
+
+            /* if (modelindex > stats.unitMaxSize - 2 - slainmodels)
+             {
+                 hasMoved = false;
+                 modelindex = 0;
+                 hasActivated = true;
+                 SelectEffect.SetActive(false);
+                 gman.EndTurn();
+
+
+             }*/
         }
     }
 
@@ -361,50 +397,7 @@ public class Unit : MonoBehaviour
             model.transform.position -= movevector;
         }
     }
-    public void ChargeUnitLeader(Vector3 targetpos)
-    {
-        AnimMove(1.0f);
-        if (Vector3.Distance(targetpos, unitLeader.gameObject.transform.position) <= chargedist)
-        {
-            unitLeader.transform.position = new Vector3(targetpos.x, unitLeader.transform.position.y, targetpos.z);
-            
-            hasMoved = true;
-            if (GetComponent<Hero>())
-            {
-                moveTool.transform.position = new Vector3(1000, chargetool.transform.position.y, 1000);
-                hasMoved = true;
-                modelindex = 0;
-                hasActivated = true;
-                SelectEffect.SetActive(false);
-                gman.EndTurn();
-
-
-
-            }
-            else
-            {
-                //set move tool to leader position and size for cohesion
-                SetChargeTool();
-                chargetool.transform.localScale = new Vector3(5, chargetool.transform.localScale.y, 5);
-            }
-
-
-        }
-        if (GetComponentsInChildren<Model>().Length <= 1)
-        {
-           // Debug.LogError(GetComponentsInChildren<Model>().Length);
-            moveTool.transform.position = new Vector3(1000, moveTool.transform.position.y, 1000);
-            hasMoved = true;
-            modelindex = 0;
-            hasActivated = true;
-            SelectEffect.SetActive(false);
-            gman.EndTurn();
-        
-        }
-
-
-
-    }
+    
 
 
     public bool RollDice(int requiredroll, int dicemodifier)
@@ -628,13 +621,7 @@ public class Unit : MonoBehaviour
         }
        
     }
-    public void SetChargeTool()
-    {
-        
-        chargetool.gameObject.SetActive(true);
-        chargetool.transform.position = new Vector3(unitLeader.transform.position.x, chargetool.transform.position.y, unitLeader.transform.position.z);
-        chargetool.transform.localScale = new Vector3(chargedist * 2, chargetool.transform.localScale.y, chargedist * 2);
-    }
+  
     public void SetAttackTool()
     {
         attacktool.gameObject.SetActive(true);

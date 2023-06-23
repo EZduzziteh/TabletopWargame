@@ -32,10 +32,7 @@ public class Model : MonoBehaviour
     private void Update()
     {
       
-       /* if (Input.GetKeyDown(KeyCode.H))
-        {
-            LerpToPos(transform.position*10f, 4);
-        }*/
+     
        
         if (ismoving)
         {
@@ -73,10 +70,5 @@ public class Model : MonoBehaviour
         
     }
 
-    // Update is called once per frame
-    /* void fixedUpdate()
-     {
-         currenttime += 1;
-        
-     }*/
+  
 }

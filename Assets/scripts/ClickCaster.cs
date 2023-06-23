@@ -21,6 +21,7 @@ public class ClickCaster : MonoBehaviour
     void Update()
     {
         
+        //left click
         if (Input.GetMouseButtonDown(0))
         {
             if (!disabled)
@@ -38,20 +39,17 @@ public class ClickCaster : MonoBehaviour
                     case GameManager.BattlePhase.Shoot:
                         HandleShooting();
                         break;
-                    case GameManager.BattlePhase.Charge:
-                        HandleCharge();
-                        break;
+                    
                     case GameManager.BattlePhase.Combat:
                         HandleCombat();
                         break;
-                    case GameManager.BattlePhase.Rally:
-                        HandleRally();
-                        break;
+                   
                 }
             }
 
 
         }
+        //right click
         else if(Input.GetMouseButtonDown(1))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -253,15 +251,18 @@ public class ClickCaster : MonoBehaviour
             if (hit.collider.gameObject.tag != "NotClickable")
             {
                 
+                //if we hit a unit
                 if (hit.collider.gameObject.GetComponent<Unit>())
                 {
+                    //if our unit has already activated
                     if (hit.collider.gameObject.GetComponent<Unit>().hasActivated)
                     {
                         gman.errorText.text = "That Unit has already activated this phase!";
                     }
+                    //if we hit an unactivated unit that belongs to the player whose turn is taking place
                     else if (hit.collider.gameObject.GetComponent<Unit>().player == gman.pTurn)
                     {
-
+                        //if we dont already have a currently selected unit, set this one as the selected unit.
                         if (!gman.SelectedUnit)
                         {
                             gman.SelectedUnit = hit.collider.gameObject.GetComponent<Unit>();
@@ -272,7 +273,7 @@ public class ClickCaster : MonoBehaviour
                         }
 
                     }
-                }
+                }//also check to see if we clicked on a model from a unit
                 else if (hit.collider.gameObject.GetComponentInParent<Unit>())
                 {
                     if (hit.collider.gameObject.GetComponentInParent<Unit>().hasActivated)
@@ -300,7 +301,7 @@ public class ClickCaster : MonoBehaviour
                 }
                 else
                 {
-                    gman.SelectedUnit.MoveModel(hit.point);
+                    //gman.SelectedUnit.MoveModel(hit.point);
                 }
 
             }
@@ -409,95 +410,7 @@ public class ClickCaster : MonoBehaviour
 
         }
     }
-    void HandleCharge()
-    {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit = new RaycastHit();
-        if (Physics.Raycast(ray, out hit))
-        {
-
-            if (hit.collider.gameObject.GetComponent<Unit>())
-            {
-                if (hit.collider.gameObject.GetComponent<Unit>().hasActivated)
-                {
-                    gman.errorText.text = "That Unit has already activated this phase!";
-                }
-                else if (hit.collider.gameObject.GetComponent<Unit>().player == gman.pTurn)
-                {
-
-
-                    gman.SelectedUnit = hit.collider.gameObject.GetComponent<Unit>();
-                    hit.collider.gameObject.GetComponent<Unit>().isSelected = true;
-                     gman.SelectedUnit.chargedist = Random.Range(1, 13);
-
-                    gman.GetClosestEnemyModelToPoint(gman.SelectedUnit.transform.position, gman.SelectedUnit.player);
-                    if (gman.closestdist <= gman.SelectedUnit.chargedist)
-                    {
-                        gman.SelectedUnit.SetChargeTool();
-                        gman.RefreshUI();
-                    }
-                    else
-                    {
-                        gman.EndTurn();
-                    }
-                    //gman.SelectedUnit.SetChargeTool();
-                  //  gman.RefreshUI();
-
-                }
-            }
-            else if (hit.collider.gameObject.GetComponentInParent<Unit>())
-            {
-                if (hit.collider.gameObject.GetComponentInParent<Unit>().hasActivated)
-                {
-                    gman.errorText.text = "That Unit has already activated this phase!";
-                }
-                else if (hit.collider.gameObject.GetComponentInParent<Unit>().player == gman.pTurn)
-                {
-
-
-                    gman.SelectedUnit = hit.collider.gameObject.GetComponentInParent<Unit>();
-                    hit.collider.gameObject.GetComponentInParent<Unit>().isSelected = true;
-                    gman.SelectedUnit.chargedist = Random.Range(1, 13);
-
-                    gman.GetClosestEnemyModelToPoint(gman.SelectedUnit.transform.position, gman.SelectedUnit.player);
-                    if (gman.closestdist <= gman.SelectedUnit.chargedist)
-                    {
-                        gman.SelectedUnit.SetChargeTool();
-                        gman.RefreshUI();
-                    }
-                    else
-                    {
-                        gman.EndTurn();
-                    }
-
-                   
-
-                }
-            }
-            //if leader hasnt moved, move leader.
-            else if (!gman.SelectedUnit.hasMoved)
-            {
-                //gman.GetClosestEnemyUnitToPoint(hit.point, gman.SelectedUnit.player);
-                gman.GetClosestEnemyModelToPoint(hit.point, gman.SelectedUnit.player);
-                
-                if (gman.closestdist<=2f)
-                {
-                    gman.SelectedUnit.ChargeUnitLeader(hit.point);
-                }
-                else
-                {
-                    gman.errorText.text = "Must end charge within 1 of an enemy";
-
-                }
-                gman.closestdist = Mathf.Infinity;
-            }
-            else
-            {
-                gman.SelectedUnit.MoveModel(hit.point);
-            }
-
-        }
-    }
+   
 
   
     void HandleCombat()

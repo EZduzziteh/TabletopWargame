@@ -97,6 +97,7 @@ public class GameManager : MonoBehaviour
     {
         if (unit.player == PlayerIndex.P1)
         {
+            
             player1ActivatedUnits.Remove(unit);
             player1Units.Remove(unit);
         }

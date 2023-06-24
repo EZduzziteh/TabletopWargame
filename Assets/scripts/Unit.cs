@@ -1,26 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.SceneManagement;
 
 public class Unit : MonoBehaviour
 {
-    public bool isthreatened=false;
-    public float basesize=0.5f;
- //   public LineFixer linefix;
+    public bool isthreatened = false;
+    public float basesize = 0.5f;
+    //   public LineFixer linefix;
 
     public float cohesionDist = 2.5f;
     public List<Transform> pilepoints = new List<Transform>();
     public bool canMelee = false;
-    public bool canShoot=false;
+    public bool canShoot = false;
     public bool canCast = false;
     public CombatText hittext;
     int pileindex = 0;
     int modelindex = 0;
     int modelcount;
     int carriedoverwounds;
-    public int modelslostthisturn=0;
-    public int slainmodels=0;
+    public int modelslostthisturn = 0;
+    public int slainmodels = 0;
     public bool isDead = false;
     public bool isSelected = false;
     public bool hasActivated = false;
@@ -37,8 +38,8 @@ public class Unit : MonoBehaviour
 
 
     public Unit closestenemyunit;
-    
-    public float closestenemyunitdistance=1000f;
+
+    public float closestenemyunitdistance = 1000f;
     // Owning player
     public GameManager.PlayerIndex player = GameManager.PlayerIndex.P1;
     public BaseStats stats;
@@ -54,7 +55,7 @@ public class Unit : MonoBehaviour
             {
                 if (unit.player != player)
                 {
-                        //#TODO make this find the closest enemy model, as the closest unit is measured from the unit leader.
+                    //#TODO make this find the closest enemy model, as the closest unit is measured from the unit leader.
 
                     if (Vector3.Distance(unit.transform.position, transform.position) <= closestenemyunitdistance)
                     {
@@ -68,7 +69,7 @@ public class Unit : MonoBehaviour
                 }
             }
         }
-      
+
     }
 
     public void Awake()
@@ -82,8 +83,8 @@ public class Unit : MonoBehaviour
 
 
         //linefix = GetComponentInChildren<LineFixer>();
-      // linefix.UpdateLine();
-     
+        // linefix.UpdateLine();
+
         caster = FindObjectOfType<ClickCaster>();
         gman = FindObjectOfType<GameManager>();
         moveTool = FindObjectOfType<MovementTool>();
@@ -109,7 +110,7 @@ public class Unit : MonoBehaviour
             }
         }
 
-       foreach(PilePoint point in GetComponentsInChildren<PilePoint>())
+        foreach (PilePoint point in GetComponentsInChildren<PilePoint>())
         {
             pilepoints.Add(point.transform);
         }
@@ -117,21 +118,9 @@ public class Unit : MonoBehaviour
 
 
 
-    IEnumerator TimeDelay(float seconds, string functiontocall)
-    {
-        //Print the time of when the function is first called.
-       // Debug.Log("Started Coroutine at timestamp : " + Time.time);
 
-        //yield on a new YieldInstruction that waits for 5 seconds.
-        yield return new WaitForSeconds(seconds);
 
-        //After we have waited 5 seconds print the time again.
-       // Debug.Log("Finished Coroutine at timestamp : " + Time.time);
-       // FinishMovingLeader();
-        Invoke(functiontocall,0);
-        caster.disabled = false;
-        
-    }
+
     public void MoveUnitLeader(Vector3 targetpos)
     {
         //trigger movement animation
@@ -141,7 +130,7 @@ public class Unit : MonoBehaviour
         //check if threatened
         if (isthreatened)
         {
-             moveamount = 0.5f*stats.move;
+            moveamount = 0.5f * stats.move;
             Debug.Log("Threatened, movement cut in half.");
         }
         else
@@ -151,12 +140,13 @@ public class Unit : MonoBehaviour
 
         if (Vector3.Distance(targetpos, unitLeader.gameObject.transform.position) <= moveamount)
         {
+            //change look at to be after the move happens.
             GetClosestEnemyUnit();
             unitLeader.transform.LookAt(closestenemyunit.transform.position);
             float dist = Vector3.Distance(unitLeader.gameObject.transform.position, targetpos);
             unitLeader.GetComponent<Model>().MoveToPos(targetpos);//LerpToPos(targetpos, dist/stats.move);
             caster.disabled = true;
-            StartCoroutine(TimeDelay(2f,"FinishMovingLeader"));
+            StartCoroutine(TimeDelay(1.0f,"CheckIfReached"));
 
 
         }
@@ -169,32 +159,39 @@ public class Unit : MonoBehaviour
             }
         }
 
-        AutoPile();
     }
 
-        public void FinishMovingLeader()
-        {
+    public void CheckIfReached()
+    {
+
+        StartCoroutine(WaitForDestinationReached(unitLeader.GetComponent<Model>().agent, "FinishMovingLeader"));
+    }
+
+    public void FinishMovingLeader()
+    {
         GetClosestEnemyUnit();
         unitLeader.transform.LookAt(closestenemyunit.transform.position);
 
-            Vector3 movevector = unitLeader.transform.position - transform.position;
+        Vector3 movevector = unitLeader.transform.position - transform.position;
 
-            transform.position = unitLeader.transform.position;
+        transform.position = unitLeader.transform.position;
 
-            foreach (Model model in GetComponentsInChildren<Model>())
-            {
+        foreach (Model model in GetComponentsInChildren<Model>())
+        {
 
-                model.transform.position -= movevector;
-            }
+            model.transform.position -= movevector;
+        }
 
-            
-            hasMoved = true;
-            if (GetComponent<Hero>())
-            {
-                moveTool.transform.position = new Vector3(1000, moveTool.transform.position.y, 1000);
-                hasMoved = false;
-                modelindex = 0;
-                hasActivated = true;
+
+        hasMoved = true;
+
+
+        if (GetComponent<Hero>()) 
+        {
+            moveTool.transform.position = new Vector3(1000, moveTool.transform.position.y, 1000);
+            hasMoved = false;
+            modelindex = 0;
+            hasActivated = true;
             if (player == GameManager.PlayerIndex.P1)
             {
                 gman.pTurn = GameManager.PlayerIndex.P2;
@@ -206,65 +203,60 @@ public class Unit : MonoBehaviour
             Debug.Log("hero ending turn");
             SelectEffect.SetActive(false);
             gman.EndTurn();
-           
-           
 
 
+
+
+
+        }
+        else //if not a hero
+        {
+            // if only one model, end the turn
+            if (GetComponentsInChildren<Model>().Length <= 1)
+            {
+                // Debug.LogError(GetComponentsInChildren<Model>().Length);
+                moveTool.transform.position = new Vector3(1000, moveTool.transform.position.y, 1000);
+                hasMoved = true;
+                modelindex = 0;
+                hasActivated = true;
+                SelectEffect.SetActive(false);
+                gman.EndTurn();
 
             }
             else
             {
-            AutoPile();
-            /*gman.errorText.text = "Pile in your units around the leader you just moved!";
-                //set move tool to leader position and size for cohesion
-                SetMoveTool();
-                moveTool.transform.localScale = new Vector3(cohesionDist*2f, moveTool.transform.localScale.y, cohesionDist*2f);
-            Debug.Log("pile in");
-            if (gman.isvsAI && player == GameManager.PlayerIndex.P2)
-            {
-                Debug.Log("moving ai");
+                //otherwise pile in the rest of the models around the leader that just mvoved
                 AutoPile();
-            }*/
+            }
         }
 
 
 
 
-
-        if (GetComponentsInChildren<Model>().Length<=1) 
-        {
-           // Debug.LogError(GetComponentsInChildren<Model>().Length);
-            moveTool.transform.position = new Vector3(1000, moveTool.transform.position.y, 1000);
-            hasMoved = true;
-            modelindex = 0;
-            hasActivated = true;
-            SelectEffect.SetActive(false);
-            gman.EndTurn();
-           
-        }
+        
 
 
 
     }
 
-   public void AutoPile()
+    public void AutoPile()
     {
-      
-       
-            if (pilepoints[pileindex])
-            {
-                MoveModel(pilepoints[pileindex].position);
-                pileindex++;
-            }
-            else
-            {
-                Debug.LogWarning("No pile point assigned to " + name);
-            }
-        
+
+
+        if (pilepoints[pileindex])
+        {
+            MoveModel(pilepoints[pileindex].position);
+            pileindex++;
+        }
+        else
+        {
+            Debug.LogWarning("No pile point assigned to " + name);
+        }
+
     }
     public void MoveModel(Vector3 targetpos)
     {
-     
+
         //-1 for leader and -1 because array.
         if (modelindex <= stats.unitMaxSize - 2 - slainmodels)
         {
@@ -272,14 +264,8 @@ public class Unit : MonoBehaviour
             float dist = Vector3.Distance(targetpos, models[modelindex].transform.position);
             models[modelindex].MoveToPos(targetpos);//LerpToPos(targetpos, dist/stats.move);//transform.position = new Vector3(targetpos.x, unitLeader.transform.position.y, targetpos.z);
             caster.disabled = true;
-            if (isthreatened)
-            {
-                StartCoroutine(TimeDelay(1.1f, "FinishMovingModel"));
-            }
-            else
-            {
-                StartCoroutine(TimeDelay(1.1f, "FinishMovingModel"));
-            }
+            StartCoroutine(TimeDelay(0.5f, "FinishMovingModel"));
+
 
 
 
@@ -397,32 +383,32 @@ public class Unit : MonoBehaviour
             model.transform.position -= movevector;
         }
     }
-    
+
 
 
     public bool RollDice(int requiredroll, int dicemodifier)
     {
-        
-            int randomnum = Random.Range(1, 7); //return 1-6 for the dice roll.
 
-       // Debug.Log("Rolled: " + randomnum);
-            if (randomnum >= requiredroll)
-            {
-                return true;//passed the roll
-            }
-            else
-            {
-                return false;//failed the roll
-            }
-        
+        int randomnum = Random.Range(1, 7); //return 1-6 for the dice roll.
+
+        // Debug.Log("Rolled: " + randomnum);
+        if (randomnum >= requiredroll)
+        {
+            return true;//passed the roll
+        }
+        else
+        {
+            return false;//failed the roll
+        }
+
     }
     public int DealRangedDamage()
     {
         AnimAttack();
-        int attackdice=0;
+        int attackdice = 0;
         int hitdice = 0;
         int wounddice = 0;
-        foreach(Model model in GetComponentsInChildren<Model>())
+        foreach (Model model in GetComponentsInChildren<Model>())
         {
             //Add attack for each model in unit
             attackdice++;
@@ -431,10 +417,10 @@ public class Unit : MonoBehaviour
         attackdice *= stats.rangedattacks;
 
         Debug.LogWarning("attacks: " + attackdice);
-        for(int i=0; i < attackdice; i++)//roll for hit on each attack
+        for (int i = 0; i < attackdice; i++)//roll for hit on each attack
         {
-           
-            if (RollDice(stats.rangedtohit,0))
+
+            if (RollDice(stats.rangedtohit, 0))
             {
                 hitdice++;
             }
@@ -444,7 +430,7 @@ public class Unit : MonoBehaviour
         for (int i = 0; i < hitdice; i++)//roll for wound on each hit
         {
 
-            if (RollDice(stats.rangedtowound,0))
+            if (RollDice(stats.rangedtowound, 0))
             {
                 wounddice++;
             }
@@ -499,7 +485,7 @@ public class Unit : MonoBehaviour
     public void TakeDamage(int rawwounds, int weapondamage, int weaponrend)
     {
         Debug.LogWarning("Took " + rawwounds + " raw wounds");
-        int unsavedwounds=0;
+        int unsavedwounds = 0;
 
         for (int i = 0; i < rawwounds; i++)//roll for wound on each hit
         {
@@ -527,7 +513,7 @@ public class Unit : MonoBehaviour
         hittext.fadetimer = Time.time + 1.5f;
         hittext.ToggleText(true);
 
-        for (int i=unsavedwounds; i>0; i--)//calculate how many models to remove and how many wounds must be assigned to a model that is still living.
+        for (int i = unsavedwounds; i > 0; i--)//calculate how many models to remove and how many wounds must be assigned to a model that is still living.
         {
             assignedwounds++;
             if (assignedwounds >= stats.wounds)
@@ -536,11 +522,11 @@ public class Unit : MonoBehaviour
                 assignedwounds = 0;
             }
 
-            
+
         }
-        Debug.LogWarning("Need to remove " + modelstoremove + " models and assign "+assignedwounds+ "Wounds");
-       
-         carriedoverwounds = assignedwounds;
+        Debug.LogWarning("Need to remove " + modelstoremove + " models and assign " + assignedwounds + "Wounds");
+
+        carriedoverwounds = assignedwounds;
 
         if (modelstoremove > 0)
         {
@@ -552,9 +538,9 @@ public class Unit : MonoBehaviour
 
     public void RemoveModels(int amounttoremove)
     {
-        if (models.Count > 0&&amounttoremove<models.Count)
+        if (models.Count > 0 && amounttoremove < models.Count)
         {
-            slainmodels+=amounttoremove;
+            slainmodels += amounttoremove;
             for (int i = 0; i < amounttoremove; i++)
             {
 
@@ -563,7 +549,7 @@ public class Unit : MonoBehaviour
 
                 models[0].transform.parent = null;
                 models.RemoveAt(0);
-               
+
             }
         }
         else
@@ -572,12 +558,12 @@ public class Unit : MonoBehaviour
             SelectEffect.SetActive(false);
             //gman.RemoveFromActivations(this);
 
-            
-       
-           // GetComponentInChildren<Animator>().SetTrigger("Die");
+
+
+            // GetComponentInChildren<Animator>().SetTrigger("Die");
             foreach (Model model in GetComponentsInChildren<Model>())
             {
-                model.GetComponentInChildren <Animator>().SetTrigger("Die");
+                model.GetComponentInChildren<Animator>().SetTrigger("Die");
             }
             unitLeader.transform.parent = null;
             if (player == GameManager.PlayerIndex.P1)
@@ -599,7 +585,7 @@ public class Unit : MonoBehaviour
             {
                 //  Debug.LogError("Wingame for p1");
                 Destroy(gman.armycon.gameObject);
-              
+
                 SceneManager.LoadScene("Win_Empire");
             }
             //Destroy(this);
@@ -613,15 +599,15 @@ public class Unit : MonoBehaviour
         moveTool.transform.position = new Vector3(unitLeader.transform.position.x, moveTool.transform.position.y, unitLeader.transform.position.z);
         if (isthreatened)
         {
-            moveTool.transform.localScale = new Vector3(stats.move , moveTool.transform.localScale.y, stats.move);
+            moveTool.transform.localScale = new Vector3(stats.move, moveTool.transform.localScale.y, stats.move);
         }
         else
         {
             moveTool.transform.localScale = new Vector3(stats.move * 2, moveTool.transform.localScale.y, stats.move * 2);
         }
-       
+
     }
-  
+
     public void SetAttackTool()
     {
         attacktool.gameObject.SetActive(true);
@@ -684,9 +670,54 @@ public class Unit : MonoBehaviour
         }
     }
 
-    
+
+    public IEnumerator WaitForDestinationReached(NavMeshAgent agent, string functiontocall)
+    {
+
+        Debug.Log("waiting for unit to reach destination: distance: " + agent.remainingDistance);
+        yield return new WaitUntilAgentReachesDestination(agent);
+        Debug.Log("agent reached destination, distance: "+ agent.remainingDistance);
+
+        Invoke(functiontocall, 0);
+        caster.disabled = false;
+    }
+
+    public class WaitUntilAgentReachesDestination : CustomYieldInstruction
+    {
+        public NavMeshAgent agent;
+
+        public override bool keepWaiting
+        {
+            get
+            {
+                Debug.Log(agent.remainingDistance + "/" + agent.stoppingDistance);
+                return !(agent.remainingDistance <= agent.stoppingDistance);
+            }
+        }
+
+        public WaitUntilAgentReachesDestination(NavMeshAgent agent)
+        {
+            this.agent = agent;
+            Debug.Log("Waiting for agent, distance left:" + agent.remainingDistance);
+        }
+    }
 
 
+    IEnumerator TimeDelay(float seconds, string functiontocall)
+    {
+        //Print the time of when the function is first called.
+        // Debug.Log("Started Coroutine at timestamp : " + Time.time);
+
+        //yield on a new YieldInstruction that waits for 5 seconds.
+        yield return new WaitForSeconds(seconds);
+
+        //After we have waited 5 seconds print the time again.
+        // Debug.Log("Finished Coroutine at timestamp : " + Time.time);
+        // FinishMovingLeader();
+        Invoke(functiontocall, 0);
+        caster.disabled = false;
+
+    }
 
 
 

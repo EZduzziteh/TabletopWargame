@@ -11,7 +11,8 @@ public class Model : MonoBehaviour
     public Vector3 endpos;
     public float totaltime;
     public bool ismoving = false;
-    NavMeshAgent agent;
+    public NavMeshAgent agent;
+    public float stoppingDistance=0.25f;
     // Start is called before the first frame update
     void Start()
     {
@@ -20,6 +21,8 @@ public class Model : MonoBehaviour
             gameObject.AddComponent<NavMeshAgent>();
         }
         agent = GetComponent <NavMeshAgent>();
+        agent.stoppingDistance = stoppingDistance;
+        agent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
         agent.speed = GetComponentInParent<Unit>().stats.move;
         agent.radius = GetComponentInParent<Unit>().basesize;
         startpos = transform.position;
@@ -57,16 +60,20 @@ public class Model : MonoBehaviour
 
     public void MoveToPos(Vector3 endpoint)
     {
+        //#TODO, maybe have to add some sort of acceptance range
         agent.SetDestination(endpoint);
     }
 
     public void Startsink()
     {
+        Debug.Log(name + "started sinking");
+        Destroy(agent);
         gameObject.AddComponent<Rigidbody>();
         GetComponent<Collider>().enabled = false;
         GetComponent<Rigidbody>().mass = 1;
         GetComponent<Rigidbody>().drag = 30;
         GetComponent<Rigidbody>().useGravity = true;
+        
         
     }
 

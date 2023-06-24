@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1902
     height: 981
   m_ShowMode: 4
-  m_Title: Scene
+  m_Title: Hierarchy
   m_RootView: {fileID: 6}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 101
+  controlID: 40
 --- !u!114 &3
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -68,8 +68,8 @@ MonoBehaviour:
     y: 0
     width: 746
     height: 931
-  m_MinSize: {x: 276, y: 71}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 275, y: 50}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 16}
   m_Panes:
   - {fileID: 16}
@@ -94,8 +94,8 @@ MonoBehaviour:
     y: 0
     width: 287
     height: 564
-  m_MinSize: {x: 201, y: 221}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 200, y: 200}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 17}
   m_Panes:
   - {fileID: 17}
@@ -325,7 +325,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Prefabs/Units/Empire
+    - Assets/scripts
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -333,16 +333,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Assets/Prefabs/Units/Empire
+  - Assets/scripts
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\Projects\Unity Projects\TabletopWargame
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 26}
-    m_SelectedIDs: 8edf0000
-    m_LastClickedID: 57230
-    m_ExpandedIDs: 00000000664f0000804f000086df000000ca9a3bffffff7f
+    scrollPos: {x: 0, y: 90}
+    m_SelectedIDs: 864f0000
+    m_LastClickedID: 20358
+    m_ExpandedIDs: 00000000664f0000804f0000a84f000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -397,7 +397,7 @@ MonoBehaviour:
   m_ListAreaState:
     m_SelectedInstanceIDs: 
     m_LastClickedInstanceID: 0
-    m_HadKeyboardFocusLastEvent: 0
+    m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: 
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -658,23 +658,23 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 6a88fbff
-      m_LastClickedID: -292758
-      m_ExpandedIDs: da9ffbffe2a3fbff14acfbffb6d1fbff1ec2fcffc0e7fcff3076fdff7e84fdff8a84fdfff087fdff3a8bfdffb49afdffc89ffdff3ec0fdff52ecfdffb8f5fdff6469feffd869feffc880feffbe0fffff4a16ffff0c1bffff56d2ffff22f3ffff00fbffffec7a0000227b00000ad8000040d800004ede000084de000036320100b63201006a580100a0580100
+      m_SelectedIDs: 864f0000
+      m_LastClickedID: 0
+      m_ExpandedIDs: 00fbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
-        m_Name: Gravetide Sentinels
-        m_OriginalName: Gravetide Sentinels
+        m_Name: 
+        m_OriginalName: 
         m_EditFieldRect:
           serializedVersion: 2
           x: 0
           y: 0
           width: 0
           height: 0
-        m_UserData: -292758
+        m_UserData: 0
         m_IsWaitingForDelay: 0
         m_IsRenaming: 0
-        m_OriginalEventType: 0
+        m_OriginalEventType: 11
         m_IsRenamingFilename: 0
         m_ClientGUIView: {fileID: 4}
       m_SearchString: 
@@ -1145,9 +1145,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: -2.7985945, y: 5.20776, z: 17.442154}
+    m_Target: {x: 7.4760733, y: -0.67469263, z: -0.36144423}
     speed: 2
-    m_Value: {x: -2.7985945, y: 5.20776, z: 17.442154}
+    m_Value: {x: 7.4760733, y: -0.67469263, z: -0.36144423}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -1193,13 +1193,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.14209487, y: 0.31195152, z: -0.047246058, w: 0.9382174}
+    m_Target: {x: 0.12150409, y: 0.7749902, z: -0.15694489, w: 0.5999863}
     speed: 2
-    m_Value: {x: 0.1434311, y: 0.31328872, z: -0.04792939, w: 0.9375396}
+    m_Value: {x: 0.12060467, y: 0.7752293, z: -0.15578315, w: 0.60017145}
   m_Size:
     m_Target: 3.6619787
     speed: 2
-    m_Value: 4.4679284
+    m_Value: 3.6619787
   m_Ortho:
     m_Target: 0
     speed: 2
